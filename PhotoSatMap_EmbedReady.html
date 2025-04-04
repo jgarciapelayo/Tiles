@@ -114,4 +114,12 @@
         container.innerHTML = '<i class="fas fa-crosshairs"></i>';
         container.title = "Recenter Map";
         container.onclick = recenterMap;
-        return container
+        return container;
+      }
+    });
+
+    map.addControl(new LocationControl());
+    map.addControl(new RecenterControl());
+  </script>
+</body>
+</html>
