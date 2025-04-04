@@ -1,12 +1,16 @@
-
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>PhotoSat Map</title>
+  <title>Leaflet Map with Location & Recenter</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+  <!-- Font Awesome (for icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
   <style>
     html, body, #map {
       height: 100%;
@@ -16,22 +20,26 @@
 
     .leaflet-bar .leaflet-control-custom {
       background-color: white;
-      width: 30px;
-      height: 30px;
-      line-height: 30px;
-      text-align: center;
-      font-size: 18px;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
       cursor: pointer;
-      user-select: none;
     }
 
     .leaflet-bar .leaflet-control-custom:hover {
-      background-color: #f0f0f0;
+      background-color: #eee;
     }
   </style>
 </head>
 <body>
   <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
   <script>
     var initialView = {
       center: [67.0646, 20.8409],
@@ -40,15 +48,17 @@
 
     var map = L.map('map').setView(initialView.center, initialView.zoom);
 
+    // Base Layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    // Custom Tiles
     L.tileLayer('https://jgarciapelayo.github.io/Tiles/NewTilesTest/{z}/{x}/{y}.png', {
       minZoom: 12,
       maxZoom: 17,
       opacity: 1,
-      attribution: 'PhotoSat Tiles'
+      attribution: 'Custom Tiles'
     }).addTo(map);
 
     var locationCircle = null;
@@ -90,8 +100,8 @@
       options: { position: 'topleft' },
       onAdd: function () {
         var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-        container.innerHTML = '📍';
-        container.title = "Toggle Location";
+        container.innerHTML = '<i class="fas fa-location-crosshairs"></i>';
+        container.title = "Show My Location";
         container.onclick = toggleLocation;
         return container;
       }
@@ -101,15 +111,7 @@
       options: { position: 'topleft' },
       onAdd: function () {
         var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-        container.innerHTML = '🔄';
+        container.innerHTML = '<i class="fas fa-crosshairs"></i>';
         container.title = "Recenter Map";
         container.onclick = recenterMap;
-        return container;
-      }
-    });
-
-    map.addControl(new LocationControl());
-    map.addControl(new RecenterControl());
-  </script>
-</body>
-</html>
+        return container
