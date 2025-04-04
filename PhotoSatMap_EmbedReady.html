@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>PhotoSat Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .leaflet-bar .leaflet-control-custom {
+      background-color: white;
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+      font-size: 18px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .leaflet-bar .leaflet-control-custom:hover {
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    var initialView = {
+      center: [67.0646, 20.8409],
+      zoom: 14.5
+    };
+
+    var map = L.map('map').setView(initialView.center, initialView.zoom);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    L.tileLayer('https://jgarciapelayo.github.io/Tiles/NewTilesTest/{z}/{x}/{y}.png', {
+      minZoom: 12,
+      maxZoom: 17,
+      opacity: 1,
+      attribution: 'PhotoSat Tiles'
+    }).addTo(map);
+
+    var locationCircle = null;
+
+    function toggleLocation() {
+      if (locationCircle) {
+        map.removeLayer(locationCircle);
+        locationCircle = null;
+        return;
+      }
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+          var lat = position.coords.latitude;
+          var lng = position.coords.longitude;
+
+          locationCircle = L.circleMarker([lat, lng], {
+            radius: 6,
+            color: 'white',
+            weight: 2,
+            fillColor: 'blue',
+            fillOpacity: 1
+          }).addTo(map);
+
+          map.setView([lat, lng], 14.5);
+        }, function (error) {
+          console.error("Error getting location:", error.message);
+        });
+      } else {
+        alert("Geolocation not supported by this browser.");
+      }
+    }
+
+    function recenterMap() {
+      map.setView(initialView.center, initialView.zoom);
+    }
+
+    var LocationControl = L.Control.extend({
+      options: { position: 'topleft' },
+      onAdd: function () {
+        var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+        container.innerHTML = '📍';
+        container.title = "Toggle Location";
+        container.onclick = toggleLocation;
+        return container;
+      }
+    });
+
+    var RecenterControl = L.Control.extend({
+      options: { position: 'topleft' },
+      onAdd: function () {
+        var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+        container.innerHTML = '🔄';
+        container.title = "Recenter Map";
+        container.onclick = recenterMap;
+        return container;
+      }
+    });
+
+    map.addControl(new LocationControl());
+    map.addControl(new RecenterControl());
+  </script>
+</body>
+</html>
