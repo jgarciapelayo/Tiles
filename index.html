@@ -29,7 +29,6 @@
       border-bottom: 1px solid #ccc;
     }
 
-    
     .leaflet-bar a:last-child,
     .leaflet-control-custom:last-child {
       border-bottom: none;
@@ -115,6 +114,33 @@
       map.setView(initialView.center, initialView.zoom);
     }
 
+    // SENSOR toggle from CSV
+    let sensorLayer = null;
+
+    function toggleSensors() {
+      if (sensorLayer) {
+        map.removeLayer(sensorLayer);
+        sensorLayer = null;
+        return;
+      }
+
+      fetch('AitikSensors.csv')
+        .then(response => response.text())
+        .then(csvText => {
+          const rows = csvText.trim().split('\n').slice(1);
+          const features = rows.map(row => {
+            const [name, lat, lon] = row.split(',');
+            return L.marker([parseFloat(lat), parseFloat(lon)])
+                     .bindPopup(`<b>${name}</b>`);
+          });
+          sensorLayer = L.layerGroup(features).addTo(map);
+        })
+        .catch(err => {
+          console.error("Error loading CSV:", err);
+          alert("Could not load sensors from CSV.");
+        });
+    }
+
     // Custom controls
     var LocationControl = L.Control.extend({
       options: { position: 'topleft' },
@@ -146,8 +172,24 @@
       }
     });
 
+    var SensorControl = L.Control.extend({
+      options: { position: 'topleft' },
+      onAdd: function () {
+        var container = L.DomUtil.create('a', 'leaflet-control-custom');
+        container.innerHTML = '📡';
+        container.title = "Toggle Sensors";
+        container.href = "#";
+        container.onclick = function (e) {
+          e.preventDefault();
+          toggleSensors();
+        };
+        return container;
+      }
+    });
+
     map.addControl(new LocationControl());
     map.addControl(new RecenterControl());
+    map.addControl(new SensorControl());
   </script>
 </body>
 </html>
