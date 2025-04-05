@@ -130,8 +130,13 @@
           const rows = csvText.trim().split('\n').slice(1);
           const features = rows.map(row => {
             const [name, lat, lon] = row.split(',');
-            return L.marker([parseFloat(lat), parseFloat(lon)])
-                     .bindPopup(`<b>${name}</b>`);
+            return L.circleMarker([parseFloat(lat), parseFloat(lon)], {
+  radius: 5,
+  color: 'red',
+  fillColor: 'red',
+  fillOpacity: 1,
+  weight: 0
+}).bindPopup(`<b>${name}</b>`);
           });
           sensorLayer = L.layerGroup(features).addTo(map);
         })
