@@ -163,44 +163,45 @@
       }
     }
 
-    function loadSensors() {
-      fetch('AitikSensors.csv')
-        .then(response => response.text())
-        .then(csvText => {
-          const rows = csvText.trim().split('\n').slice(1);
-          allSensors = rows.map(row => {
-            const [name, lat, lon] = row.split(',');
-            return {
-              name: name.trim(),
-              lat: parseFloat(lat),
-              lon: parseFloat(lon)
-            };
+function loadSensors() {
+  fetch('AitikSensors.csv')
+    .then(response => response.text())
+    .then(csvText => {
+      const rows = csvText.trim().split('\n').slice(1);
+      allSensors = rows.map(row => {
+        const [name, lat, lon] = row.split(',');
+        return {
+          name: name.trim(),
+          lat: parseFloat(lat),
+          lon: parseFloat(lon)
+        };
+      });
+      renderSensors();
+    })
+    .catch(() => {
+      // First attempt failed — retry silently
+      setTimeout(() => {
+        fetch('AitikSensors.csv')
+          .then(response => response.text())
+          .then(csvText => {
+            const rows = csvText.trim().split('\n').slice(1);
+            allSensors = rows.map(row => {
+              const [name, lat, lon] = row.split(',');
+              return {
+                name: name.trim(),
+                lat: parseFloat(lat),
+                lon: parseFloat(lon)
+              };
+            });
+            renderSensors();
+          })
+          .catch(() => {
+            // Second attempt failed — do nothing at all
           });
-          renderSensors();
-        })
-        .catch(err => {
-          console.warn("Warning: Failed to load sensors. Retrying in 1 second.", err);
-          setTimeout(() => {
-            fetch('AitikSensors.csv')
-              .then(response => response.text())
-              .then(csvText => {
-                const rows = csvText.trim().split('\n').slice(1);
-                allSensors = rows.map(row => {
-                  const [name, lat, lon] = row.split(',');
-                  return {
-                    name: name.trim(),
-                    lat: parseFloat(lat),
-                    lon: parseFloat(lon)
-                  };
-                });
-                renderSensors();
-              })
-              .catch(() => {
-                alert("Could not load sensors from CSV.");
-              });
-          }, 1000);
-        });
-    }
+      }, 1000);
+    });
+}
+
 
     function toggleSensors() {
       if (sensorLayer) {
