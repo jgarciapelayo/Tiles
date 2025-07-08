@@ -163,13 +163,7 @@
       }
     }
 
-    function toggleSensors() {
-      if (sensorLayer) {
-        map.removeLayer(sensorLayer);
-        sensorLayer = null;
-        return;
-      }
-
+    function loadSensors() {
       fetch('AitikSensors.csv')
         .then(response => response.text())
         .then(csvText => {
@@ -182,34 +176,42 @@
               lon: parseFloat(lon)
             };
           });
-
-          renderSensors(); // initial render
+          renderSensors();
         })
-.catch(err => {
-  console.warn("Warning: Failed to load sensors. Retrying in 1 second.", err);
-  setTimeout(() => {
-    fetch('AitikSensors.csv') // retry once
-      .then(response => response.text())
-      .then(csvText => {
-        const rows = csvText.trim().split('\n').slice(1);
-        allSensors = rows.map(row => {
-          const [name, lat, lon] = row.split(',');
-          return {
-            name: name.trim(),
-            lat: parseFloat(lat),
-            lon: parseFloat(lon)
-          };
+        .catch(err => {
+          console.warn("Warning: Failed to load sensors. Retrying in 1 second.", err);
+          setTimeout(() => {
+            fetch('AitikSensors.csv')
+              .then(response => response.text())
+              .then(csvText => {
+                const rows = csvText.trim().split('\n').slice(1);
+                allSensors = rows.map(row => {
+                  const [name, lat, lon] = row.split(',');
+                  return {
+                    name: name.trim(),
+                    lat: parseFloat(lat),
+                    lon: parseFloat(lon)
+                  };
+                });
+                renderSensors();
+              })
+              .catch(() => {
+                alert("Could not load sensors from CSV.");
+              });
+          }, 1000);
         });
-        renderSensors();
-      })
-      .catch(() => {
-        alert("Could not load sensors from CSV.");
-      });
-});
-
     }
 
-    // Custom controls
+    function toggleSensors() {
+      if (sensorLayer) {
+        map.removeLayer(sensorLayer);
+        sensorLayer = null;
+      } else {
+        renderSensors();
+      }
+    }
+
+    // Controls
     var LocationControl = L.Control.extend({
       options: { position: 'topleft' },
       onAdd: function () {
@@ -259,13 +261,14 @@
     map.addControl(new RecenterControl());
     map.addControl(new SensorControl());
 
-    // Search input event
+    // Sensor search
     document.getElementById('sensorSearch').addEventListener('input', function (e) {
       const filterText = e.target.value;
       renderSensors(filterText);
     });
-        // 🔽 Add this to auto-load sensors
-    toggleSensors();
+
+    // ✅ Load sensors on page load
+    loadSensors();
   </script>
 </body>
 </html>
