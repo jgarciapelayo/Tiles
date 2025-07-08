@@ -185,10 +185,28 @@
 
           renderSensors(); // initial render
         })
-        .catch(err => {
-          console.error("Error loading CSV:", err);
-          alert("Could not load sensors from CSV.");
+.catch(err => {
+  console.warn("Warning: Failed to load sensors. Retrying in 1 second.", err);
+  setTimeout(() => {
+    fetch('AitikSensors.csv') // retry once
+      .then(response => response.text())
+      .then(csvText => {
+        const rows = csvText.trim().split('\n').slice(1);
+        allSensors = rows.map(row => {
+          const [name, lat, lon] = row.split(',');
+          return {
+            name: name.trim(),
+            lat: parseFloat(lat),
+            lon: parseFloat(lon)
+          };
         });
+        renderSensors();
+      })
+      .catch(() => {
+        alert("Could not load sensors from CSV.");
+      });
+});
+
     }
 
     // Custom controls
