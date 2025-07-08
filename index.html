@@ -245,6 +245,9 @@
     document.getElementById('sensorSearch').addEventListener('input', function (e) {
       const filterText = e.target.value;
       renderSensors(filterText);
+
+          // 🔽 Add this to auto-load sensors
+    toggleSensors();
     });
   </script>
 </body>
